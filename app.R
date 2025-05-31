@@ -838,7 +838,13 @@ server <- function(input, output, session) {
       df <- df %>% mutate(
         Unaltered_Length_aa  = if_else(Mutation_Type == 'Frameshifting indel', (floor((Locus-1)/3)+1)-1, NA_integer_),
         Frameshift_Length_aa = if_else(Mutation_Type == 'Frameshifting indel', Protein_Length_aa - ((floor((Locus-1)/3)+1)-1), NA_integer_)
-      )
+      ) %>%
+        mutate(
+          Mutation_Type = case_when(
+            Mutation_Type == "Frameshifting indel" & Frameshift_Length_aa == 0 ~ "Nonsense",
+            TRUE ~ Mutation_Type
+          )
+        )
       
       colnames(df) <- gsub("_", " ", colnames(df))
       df <- df %>% select(-c(`Mutated Sequence`,`Mutated Protein`), everything(), `Mutated Sequence`,`Mutated Protein`)
